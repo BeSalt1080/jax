@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class SplitScreen extends StatelessWidget {
   const SplitScreen({super.key});
@@ -6,8 +7,99 @@ class SplitScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Split PDF')),
-      body: const Center(child: Text('Split PDF screen')),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => context.go('/'),
+                    child: const Icon(Icons.arrow_back, size: 28),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Split PDF',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Material(
+                      color: const Color(0xFFD9D9D9),
+                      borderRadius: BorderRadius.circular(8),
+                      child: InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          width: 250,
+                          height: 150,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.content_cut, size: 50, color: Colors.black54),
+                              const SizedBox(height: 16),
+                              Text(
+                                'Select PDF file',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black.withOpacity(0.7),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'or drop PDF here',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Material(
+                color: const Color(0xFFFF4D4D),
+                borderRadius: BorderRadius.circular(4),
+                child: InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(4),
+                  child: Container(
+                    width: double.infinity,
+                    height: 55,
+                    alignment: Alignment.center,
+                    child: const Text(
+                      'Split PDF',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
