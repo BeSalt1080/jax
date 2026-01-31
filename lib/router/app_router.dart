@@ -4,6 +4,7 @@ import '../screens/merge_screen.dart';
 import '../screens/split_screen.dart';
 import '../screens/compress_screen.dart';
 import '../screens/organize_screen.dart';
+import '../screens/settings_screen.dart';
 
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
@@ -28,6 +29,9 @@ final GoRouter appRouter = GoRouter(
       path: '/organize',
       builder: (context, state) => const OrganizeScreen(),
     ),
-
+    GoRoute(
+      path: '/settings',
+      builder: (context, state) => const SettingsScreen(),
+    )
   ],
 );

@@ -6,26 +6,68 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. This "Key" is like a remote control for the Scaffold
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
     return Scaffold(
+      key: scaffoldKey, // Connect the remote control here
       backgroundColor: Colors.white,
+
+      // 2. This is the Sidebar (Drawer) definition
+      drawer: Drawer(
+        child: Column(
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Color(0xFFFF4D4D)),
+              child: Center(
+                child: Text(
+                  'JAX PDF',
+                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home_outlined),
+              title: const Text('Home'),
+              onTap: () => context.pop(), // Closes the drawer
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+              onTap: () {
+                context.pop(); // Close drawer
+                context.push('/settings'); // Go to settings
+              },
+            ),
+          ],
+        ),
+      ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.arrow_right_alt, size: 28),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'More Tools',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
-                    ),
-                  ],
+              // 3. We wrap "More Tools" in InkWell to make it a button that opens the drawer
+              InkWell(
+                onTap: () => scaffoldKey.currentState?.openDrawer(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min, // Shrinks the hit area to just the text
+                    children: [
+                      const Icon(Icons.menu, size: 28), // Changed icon to a menu burger
+                      const SizedBox(width: 12),
+                      const Text(
+                        'More Tools',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
