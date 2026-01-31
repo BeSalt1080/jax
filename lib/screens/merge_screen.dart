@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jax/services/pdf_services.dart';
 
 class MergeScreen extends StatelessWidget {
   const MergeScreen({super.key});
@@ -38,7 +39,12 @@ class MergeScreen extends StatelessWidget {
                       color: const Color(0xFFD9D9D9),
                       borderRadius: BorderRadius.circular(8),
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () async {
+                          final paths = await mergeProcess();
+                          if (paths != null && paths.isNotEmpty) {
+                            context.go('/merge-view', extra: paths);
+                          }
+                        },
                         borderRadius: BorderRadius.circular(8),
                         child: Container(
                           width: 250,
@@ -79,7 +85,12 @@ class MergeScreen extends StatelessWidget {
                 color: const Color(0xFFFF4D4D),
                 borderRadius: BorderRadius.circular(4),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () async {
+                    final paths = await mergeProcess();
+                    if (paths != null && paths.isNotEmpty) {
+                      context.go('/merge-view', extra: paths);
+                    }
+                  },
                   borderRadius: BorderRadius.circular(4),
                   child: Container(
                     width: double.infinity,
