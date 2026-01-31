@@ -6,128 +6,121 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. This "Key" is like a remote control for the Scaffold
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      key: scaffoldKey, // Connect the remote control here
-      backgroundColor: Colors.white,
-
-      // 2. This is the Sidebar (Drawer) definition
-      drawer: Drawer(
-        child: Column(
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFFFF4D4D)),
-              child: Center(
+      key: scaffoldKey,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      drawer: SizedBox(
+        width: 220,
+        child: Drawer(
+          elevation: 0,
+          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
                 child: Text(
-                  'JAX PDF',
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+                  'JAX',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.home_outlined),
-              title: const Text('Home'),
-              onTap: () => context.pop(), // Closes the drawer
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
-              onTap: () {
-                context.pop(); // Close drawer
-                context.push('/settings'); // Go to settings
-              },
-            ),
-          ],
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Divider(thickness: 1),
+              ),
+              const SizedBox(height: 10),
+              _buildSimpleLink(context, Icons.home_filled, 'Home', '/'),
+              _buildSimpleLink(context, Icons.link, 'Merge', '/merge'),
+              _buildSimpleLink(context, Icons.content_cut, 'Split', '/split'),
+              _buildSimpleLink(context, Icons.compress, 'Compress', '/compress'),
+              _buildSimpleLink(context, Icons.layers_outlined, 'Organize', '/organize'),
+              const Spacer(),
+              _buildSimpleLink(context, Icons.settings_outlined, 'Settings', '/settings'),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 3. We wrap "More Tools" in InkWell to make it a button that opens the drawer
               InkWell(
                 onTap: () => scaffoldKey.currentState?.openDrawer(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
                   child: Row(
-                    mainAxisSize: MainAxisSize.min, // Shrinks the hit area to just the text
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.menu, size: 28), // Changed icon to a menu burger
+                      Icon(Icons.menu, size: 24, color: isDark ? Colors.white : Colors.black),
                       const SizedBox(width: 12),
-                      const Text(
+                      Text(
                         'More Tools',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                        style: TextStyle(
+                          fontSize: 16, 
+                          fontWeight: FontWeight.w400,
+                          color: isDark ? Colors.white : Colors.black,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildToolButton(
-                    context: context,
-                    icon: Icons.link,
-                    label: 'Merge PDF',
-                    route: '/merge',
-                  ),
-                  _buildToolButton(
-                    context: context,
-                    icon: Icons.view_column_outlined,
-                    label: 'Split PDF',
-                    route: '/split',
-                  ),
-                  _buildToolButton(
-                    context: context,
-                    icon: Icons.inventory_2_outlined,
-                    label: 'Compress PDF',
-                    route: '/compress',
-                  ),
-                  _buildToolButton(
-                    context: context,
-                    icon: Icons.swap_vert,
-                    label: 'Organize PDF',
-                    route: '/organize',
-                  ),
+                  _buildToolButton(context, Icons.link, 'Merge PDF', '/merge'),
+                  _buildToolButton(context, Icons.view_column_outlined, 'Split PDF', '/split'),
+                  _buildToolButton(context, Icons.inventory_2_outlined, 'Compress PDF', '/compress'),
+                  _buildToolButton(context, Icons.swap_vert, 'Organize PDF', '/organize'),
                 ],
               ),
               const SizedBox(height: 30),
-              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+              Divider(thickness: 1, color: isDark ? Colors.white10 : const Color(0xFFE0E0E0)),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                     borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey.shade300),
+                    border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
                   ),
-                  child: const Center(
+                  child: Center(
                     child: TextField(
                       textAlignVertical: TextAlignVertical.center,
+                      style: TextStyle(color: isDark ? Colors.white : Colors.black),
                       decoration: InputDecoration(
                         hintText: 'Search...',
-                        hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
-                        contentPadding: EdgeInsets.only(left: 16, bottom: 12),
+                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
+                        contentPadding: const EdgeInsets.only(left: 16, bottom: 12),
                         border: InputBorder.none,
-                        suffixIcon: Icon(Icons.search, size: 20, color: Colors.black54),
+                        suffixIcon: Icon(Icons.search, size: 20, color: isDark ? Colors.white54 : Colors.black54),
                       ),
                     ),
                   ),
                 ),
               ),
-              const Padding(
-                padding: EdgeInsets.fromLTRB(16, 40, 16, 20),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 40, 16, 20),
                 child: Text(
                   'Recent',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                  style: TextStyle(
+                    fontSize: 22, 
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
                 ),
               ),
               SizedBox(
@@ -151,16 +144,32 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolButton({
-    required BuildContext context,
-    required IconData icon,
-    required String label,
-    required String route,
-  }) {
+  Widget _buildSimpleLink(BuildContext context, IconData icon, String title, String route) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    return ListTile(
+      visualDensity: VisualDensity.compact,
+      leading: Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.black87),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14, 
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : Colors.black,
+        ),
+      ),
+      onTap: () {
+        context.pop();
+        context.push(route);
+      },
+    );
+  }
+
+  Widget _buildToolButton(BuildContext context, IconData icon, String label, String route) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       children: [
         Material(
-          color: const Color(0xFFD9D9D9),
+          color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFD9D9D9),
           borderRadius: BorderRadius.circular(4),
           child: InkWell(
             borderRadius: BorderRadius.circular(4),
@@ -168,14 +177,18 @@ class HomeScreen extends StatelessWidget {
             child: SizedBox(
               width: 80,
               height: 80,
-              child: Icon(icon, size: 30, color: Colors.black87),
+              child: Icon(icon, size: 30, color: isDark ? Colors.white70 : Colors.black87),
             ),
           ),
         ),
         const SizedBox(height: 12),
         Text(
           label,
-          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+          style: TextStyle(
+            fontSize: 13, 
+            fontWeight: FontWeight.w500,
+            color: isDark ? Colors.white70 : Colors.black,
+          ),
         ),
       ],
     );

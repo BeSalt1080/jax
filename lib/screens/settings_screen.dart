@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../main.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -18,18 +21,21 @@ class SettingsScreen extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => context.pop(),
-                    child: const Icon(Icons.arrow_back, size: 28),
+                    child: Icon(Icons.arrow_back, size: 28, color: isDark ? Colors.white : Colors.black),
                   ),
                   const SizedBox(width: 12),
-                  const Text(
+                  Text(
                     'Settings',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    style: TextStyle(
+                      fontSize: 18, 
+                      fontWeight: FontWeight.w400,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
                   ),
                 ],
               ),
             ),
             const Divider(thickness: 1),
-            
             Expanded(
               child: ListView(
                 children: [
@@ -39,19 +45,14 @@ class SettingsScreen extends StatelessWidget {
                   ),
                   ListTile(
                     leading: const Icon(Icons.palette_outlined),
-                    title: const Text('Theme Mode'),
-                    subtitle: const Text('System Default'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {
-                      // We will add the logic to switch themes here later
-                    },
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.color_lens_outlined),
-                    title: const Text('Primary Color'),
-                    subtitle: const Text('Jax Red'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () {},
+                    title: const Text('Dark Mode'),
+                    trailing: Switch(
+                      value: isDark,
+                      activeColor: const Color(0xFFFF4D4D),
+                      onChanged: (bool value) {
+                        JaxApp.themeNotifier.value = value ? ThemeMode.dark : ThemeMode.light;
+                      },
+                    ),
                   ),
                   const Divider(),
                   const Padding(
