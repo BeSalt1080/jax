@@ -7,67 +7,152 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Jax PDF Tools')),
-      body: GridView.count(
-        padding: const EdgeInsets.all(16),
-        crossAxisCount: 2,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        children: [
-          _ToolTile(
-            title: 'Merge PDF',
-            icon: Icons.merge,
-            onTap: () => context.go('/merge'),
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+                child: Row(
+                  children: [
+                    const Icon(Icons.arrow_right_alt, size: 28),
+                    const SizedBox(width: 8),
+                    const Text(
+                      'More Tools',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildToolButton(
+                    context: context,
+                    icon: Icons.link,
+                    label: 'Merge PDF',
+                    route: '/merge',
+                  ),
+                  _buildToolButton(
+                    context: context,
+                    icon: Icons.view_column_outlined,
+                    label: 'Split PDF',
+                    route: '/split',
+                  ),
+                  _buildToolButton(
+                    context: context,
+                    icon: Icons.inventory_2_outlined,
+                    label: 'Compress PDF',
+                    route: '/compress',
+                  ),
+                  _buildToolButton(
+                    context: context,
+                    icon: Icons.swap_vert,
+                    label: 'Organize PDF',
+                    route: '/organize',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              const Divider(thickness: 1, color: Color(0xFFE0E0E0)),
+              const SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Container(
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Center(
+                    child: TextField(
+                      textAlignVertical: TextAlignVertical.center,
+                      decoration: InputDecoration(
+                        hintText: 'Search...',
+                        hintStyle: TextStyle(color: Colors.grey, fontSize: 15),
+                        contentPadding: EdgeInsets.only(left: 16, bottom: 12),
+                        border: InputBorder.none,
+                        suffixIcon: Icon(Icons.search, size: 20, color: Colors.black54),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(16, 40, 16, 20),
+                child: Text(
+                  'Recent',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                ),
+              ),
+              SizedBox(
+                height: 220,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  children: [
+                    _buildRecentItem(Icons.post_add),
+                    _buildRecentItem(Icons.find_in_page_outlined),
+                    _buildRecentItem(Icons.find_in_page_outlined),
+                    _buildRecentItem(Icons.find_in_page_outlined),
+                    _buildRecentItem(Icons.find_in_page_outlined),
+                  ],
+                ),
+              ),
+            ],
           ),
-          _ToolTile(
-            title: 'Split PDF',
-            icon: Icons.call_split,
-            onTap: () => context.go('/split'),
-          ),
-          _ToolTile(
-            title: 'Compress PDF',
-            icon: Icons.compress,
-            onTap: () => context.go('/compress'),
-          ),
-          _ToolTile(
-            title: 'Organize PDF',
-            icon: Icons.view_list,
-            onTap: () => context.go('/organize'),
-          ),
-        ],
+        ),
       ),
     );
   }
-}
 
-class _ToolTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _ToolTile({
-    required this.title,
-    required this.icon,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
-      onTap: onTap,
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+  Widget _buildToolButton({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required String route,
+  }) {
+    return Column(
+      children: [
+        Material(
+          color: const Color(0xFFD9D9D9),
+          borderRadius: BorderRadius.circular(4),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(4),
+            onTap: () => context.go(route),
+            child: SizedBox(
+              width: 80,
+              height: 80,
+              child: Icon(icon, size: 30, color: Colors.black87),
+            ),
+          ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 48),
-            const SizedBox(height: 12),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-          ],
+        const SizedBox(height: 12),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildRecentItem(IconData icon) {
+    return Container(
+      width: 150,
+      margin: const EdgeInsets.only(right: 16, bottom: 10),
+      child: Material(
+        color: const Color(0xFFFF4D4D),
+        borderRadius: BorderRadius.circular(4),
+        elevation: 2,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(4),
+          onTap: () {},
+          child: Center(
+            child: Icon(icon, size: 60, color: Colors.black),
+          ),
         ),
       ),
     );
