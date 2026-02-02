@@ -1,142 +1,187 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:file_picker/file_picker.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _showTip = true;
+  List<String> _recentFiles = ['Report_Q4.pdf', 'Contract_Signed.pdf', 'Design_Spec.pdf'];
+
+  Future<void> _handleFileSelection() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: true,
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null && mounted) {
+      _showSmartActionMenu(result.files);
+    }
+  }
+
+  void _showSmartActionMenu(List<PlatformFile> files) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    final bool isMultiple = files.length > 1;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isMultiple ? '${files.length} Files Selected' : files.first.name,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
+            const Text('What would you like to do?', style: TextStyle(color: Colors.grey, fontSize: 13)),
+            const SizedBox(height: 16),
+            if (isMultiple)
+              _buildActionButton(context, Icons.link, 'Merge these files', '/merge')
+            else ...[
+              _buildActionButton(context, Icons.compress, 'Compress file', '/compress'),
+              _buildActionButton(context, Icons.content_cut, 'Split into parts', '/split'),
+              _buildActionButton(context, Icons.layers_outlined, 'Organize pages', '/organize'),
+            ],
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      key: scaffoldKey,
+      key: _scaffoldKey,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      drawer: SizedBox(
-        width: 220,
-        child: Drawer(
-          elevation: 0,
-          backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-                child: Text(
-                  'JAX',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.5,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Divider(thickness: 1),
-              ),
-              const SizedBox(height: 10),
-              _buildSimpleLink(context, Icons.home_filled, 'Home', '/'),
-              _buildSimpleLink(context, Icons.link, 'Merge', '/merge'),
-              _buildSimpleLink(context, Icons.content_cut, 'Split', '/split'),
-              _buildSimpleLink(context, Icons.compress, 'Compress', '/compress'),
-              _buildSimpleLink(context, Icons.layers_outlined, 'Organize', '/organize'),
-              const Spacer(),
-              _buildSimpleLink(context, Icons.settings_outlined, 'Settings', '/settings'),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
+      drawer: _buildThinnerSidebar(context, isDark),
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InkWell(
-                onTap: () => scaffoldKey.currentState?.openDrawer(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.menu, size: 24, color: isDark ? Colors.white : Colors.black),
-                      const SizedBox(width: 12),
-                      Text(
-                        'More Tools',
-                        style: TextStyle(
-                          fontSize: 16, 
-                          fontWeight: FontWeight.w400,
-                          color: isDark ? Colors.white : Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _buildToolButton(context, Icons.link, 'Merge PDF', '/merge'),
-                  _buildToolButton(context, Icons.view_column_outlined, 'Split PDF', '/split'),
-                  _buildToolButton(context, Icons.inventory_2_outlined, 'Compress PDF', '/compress'),
-                  _buildToolButton(context, Icons.swap_vert, 'Organize PDF', '/organize'),
-                ],
-              ),
-              const SizedBox(height: 30),
-              Divider(thickness: 1, color: isDark ? Colors.white10 : const Color(0xFFE0E0E0)),
-              const SizedBox(height: 20),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: isDark ? Colors.white10 : Colors.grey.shade300),
-                  ),
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(isDark),
+                const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Divider(thickness: 1)),
+                Expanded(
                   child: Center(
-                    child: TextField(
-                      textAlignVertical: TextAlignVertical.center,
-                      style: TextStyle(color: isDark ? Colors.white : Colors.black),
-                      decoration: InputDecoration(
-                        hintText: 'Search...',
-                        hintStyle: const TextStyle(color: Colors.grey, fontSize: 15),
-                        contentPadding: const EdgeInsets.only(left: 16, bottom: 12),
-                        border: InputBorder.none,
-                        suffixIcon: Icon(Icons.search, size: 20, color: isDark ? Colors.white54 : Colors.black54),
+                    child: Container(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildSearchBar(isDark),
+                            const SizedBox(height: 32),
+                            _buildHeroUploadArea(isDark),
+                            const SizedBox(height: 32),
+                            _buildSectionHeader('FAVORITES', isDark),
+                            const SizedBox(height: 12),
+                            _buildPinnedTools(context, isDark),
+                            const SizedBox(height: 32),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildSectionHeader('RECENT ACTIVITY', isDark),
+                                if (_recentFiles.isNotEmpty)
+                                  TextButton(
+                                    onPressed: () => setState(() => _recentFiles.clear()),
+                                    child: const Text('Clear', style: TextStyle(fontSize: 11, color: Color(0xFFFF4D4D))),
+                                  ),
+                              ],
+                            ),
+                            _buildRecentList(isDark),
+                            const SizedBox(height: 60),
+                            _buildPrivacyBadge(isDark),
+                            const SizedBox(height: 100), // Space for tooltip
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 40, 16, 20),
-                child: Text(
-                  'Recent',
-                  style: TextStyle(
-                    fontSize: 22, 
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 220,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  children: [
-                    _buildRecentItem(Icons.post_add),
-                    _buildRecentItem(Icons.find_in_page_outlined),
-                    _buildRecentItem(Icons.find_in_page_outlined),
-                    _buildRecentItem(Icons.find_in_page_outlined),
-                    _buildRecentItem(Icons.find_in_page_outlined),
-                  ],
-                ),
-              ),
+              ],
+            ),
+            if (_showTip) _buildFloatingTooltip(isDark),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            icon: Icon(Icons.menu, color: isDark ? Colors.white : Colors.black),
+          ),
+          const SizedBox(width: 8),
+          const Text('JAX PDF', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 1.1)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(bool isDark) {
+    return Container(
+      height: 45,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black12),
+      ),
+      child: TextField(
+        textAlignVertical: TextAlignVertical.center,
+        style: TextStyle(fontSize: 14, color: isDark ? Colors.white : Colors.black),
+        decoration: InputDecoration(
+          hintText: 'Search tools or files...',
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          border: InputBorder.none,
+          suffixIcon: Icon(Icons.search, size: 18, color: isDark ? Colors.white54 : Colors.black54),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeroUploadArea(bool isDark) {
+    return Material(
+      color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF9F9F9),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: _handleFileSelection,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 60),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
+          ),
+          child: Column(
+            children: [
+              const Icon(Icons.add_circle_outline, size: 48, color: Color(0xFFFF4D4D)),
+              const SizedBox(height: 16),
+              const Text('Select or Drop PDF', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+              const SizedBox(height: 4),
+              const Text('Your files stay private & local', style: TextStyle(fontSize: 12, color: Colors.grey)),
             ],
           ),
         ),
@@ -144,19 +189,123 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSimpleLink(BuildContext context, IconData icon, String title, String route) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return ListTile(
-      visualDensity: VisualDensity.compact,
-      leading: Icon(icon, size: 20, color: isDark ? Colors.white70 : Colors.black87),
-      title: Text(
-        title,
-        style: TextStyle(
-          fontSize: 14, 
-          fontWeight: FontWeight.w500,
-          color: isDark ? Colors.white : Colors.black,
+  Widget _buildPinnedTools(BuildContext context, bool isDark) {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _toolChip(context, Icons.link, 'Merge', '/merge', isDark),
+        _toolChip(context, Icons.compress, 'Compress', '/compress', isDark),
+        _toolChip(context, Icons.content_cut, 'Split', '/split', isDark),
+        _toolChip(context, Icons.layers_outlined, 'Organize', '/organize', isDark),
+      ],
+    );
+  }
+
+  Widget _toolChip(BuildContext context, IconData icon, String label, String route, bool isDark) {
+    return Material(
+      color: isDark ? const Color(0xFF2C2C2C) : Colors.black,
+      borderRadius: BorderRadius.circular(4),
+      child: InkWell(
+        onTap: () => context.push(route),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: Colors.white),
+              const SizedBox(width: 10),
+              Text(label, style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _buildRecentList(bool isDark) {
+    if (_recentFiles.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: Text('No recent activity', style: TextStyle(color: Colors.grey, fontSize: 12)),
+      );
+    }
+    return Column(
+      children: _recentFiles.map((file) => _recentItem(file, isDark)).toList(),
+    );
+  }
+
+  Widget _recentItem(String name, bool isDark) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.picture_as_pdf, color: Color(0xFFFF4D4D), size: 24),
+      title: Text(name, style: const TextStyle(fontSize: 13)),
+      trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.grey),
+      onTap: () {},
+    );
+  }
+
+  Widget _buildPrivacyBadge(bool isDark) {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isDark ? Colors.white.withOpacity(0.03) : Colors.black.withOpacity(0.03),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.shield_outlined, size: 14, color: Colors.grey),
+            const SizedBox(width: 8),
+            Text('Bank-level privacy. Files never leave your device.', style: TextStyle(fontSize: 10, color: Colors.grey.shade600)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFloatingTooltip(bool isDark) {
+    return Positioned(
+      bottom: 20,
+      right: 20,
+      child: Container(
+        width: 280,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2C2C2C) : Colors.black,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [const BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 4))],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('PRO TIP', style: TextStyle(color: Color(0xFFFF4D4D), fontSize: 10, fontWeight: FontWeight.bold)),
+                GestureDetector(
+                  onTap: () => setState(() => _showTip = false),
+                  child: const Icon(Icons.close, color: Colors.white54, size: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Select multiple files at once to use the Merge tool automatically.',
+              style: TextStyle(color: Colors.white, fontSize: 12, height: 1.4),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, IconData icon, String label, String route) {
+    return ListTile(
+      leading: Icon(icon, color: const Color(0xFFFF4D4D)),
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
       onTap: () {
         context.pop();
         context.push(route);
@@ -164,52 +313,43 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToolButton(BuildContext context, IconData icon, String label, String route) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      children: [
-        Material(
-          color: isDark ? const Color(0xFF2C2C2C) : const Color(0xFFD9D9D9),
-          borderRadius: BorderRadius.circular(4),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(4),
-            onTap: () => context.go(route),
-            child: SizedBox(
-              width: 80,
-              height: 80,
-              child: Icon(icon, size: 30, color: isDark ? Colors.white70 : Colors.black87),
+  Widget _buildSectionHeader(String title, bool isDark) {
+    return Text(title, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: isDark ? Colors.white38 : Colors.black38, letterSpacing: 1.5));
+  }
+
+  Widget _buildThinnerSidebar(BuildContext context, bool isDark) {
+    return SizedBox(
+      width: 220,
+      child: Drawer(
+        elevation: 0,
+        backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
+        shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
+              child: Text('JAX', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2, color: isDark ? Colors.white : Colors.black)),
             ),
-          ),
+            const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Divider()),
+            _sideLink(context, Icons.home_filled, 'Home', '/'),
+            _sideLink(context, Icons.settings_outlined, 'Settings', '/settings'),
+          ],
         ),
-        const SizedBox(height: 12),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 13, 
-            fontWeight: FontWeight.w500,
-            color: isDark ? Colors.white70 : Colors.black,
-          ),
-        ),
-      ],
+      ),
     );
   }
 
-  Widget _buildRecentItem(IconData icon) {
-    return Container(
-      width: 150,
-      margin: const EdgeInsets.only(right: 16, bottom: 10),
-      child: Material(
-        color: const Color(0xFFFF4D4D),
-        borderRadius: BorderRadius.circular(4),
-        elevation: 2,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(4),
-          onTap: () {},
-          child: Center(
-            child: Icon(icon, size: 60, color: Colors.black),
-          ),
-        ),
-      ),
+  Widget _sideLink(BuildContext context, IconData icon, String title, String route) {
+    final bool isDarkValue = Theme.of(context).brightness == Brightness.dark;
+    return ListTile(
+      visualDensity: VisualDensity.compact,
+      leading: Icon(icon, size: 18, color: isDarkValue ? Colors.white70 : Colors.black87),
+      title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDarkValue ? Colors.white : Colors.black)),
+      onTap: () {
+        context.pop();
+        context.push(route);
+      },
     );
   }
 }
