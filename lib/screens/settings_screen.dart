@@ -49,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     title: const Text('Dark Mode', style: TextStyle(fontWeight: FontWeight.w500)),
                     trailing: Switch(
-                      activeColor: const Color(0xFFFF4D4D),
+                      activeThumbColor: const Color(0xFFFF4D4D),
                       value: isDark,
                       onChanged: (val) => JaxApp.themeNotifier.value = val ? ThemeMode.dark : ThemeMode.light,
                     ),
