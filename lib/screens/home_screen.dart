@@ -319,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildThinnerSidebar(BuildContext context, bool isDark) {
     return SizedBox(
-      width: 220,
+      width: 240, // Slightly wider for better text fit
       child: Drawer(
         elevation: 0,
         backgroundColor: isDark ? const Color(0xFF121212) : Colors.white,
@@ -327,27 +327,128 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // BRANDING HEADER
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 60, 20, 20),
-              child: Text('JAX', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, letterSpacing: 2, color: isDark ? Colors.white : Colors.black)),
+              padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'JAX',
+                    style: TextStyle(
+                      fontSize: 24, 
+                      fontWeight: FontWeight.bold, 
+                      letterSpacing: 3,
+                    ),
+                  ),
+                  Text(
+                    'PDF WORKSPACE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFFFF4D4D),
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 20), child: Divider()),
-            _sideLink(context, Icons.home_filled, 'Home', '/'),
+            
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: Divider(thickness: 1),
+            ),
+            
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                children: [
+                  // SECTION: GENERAL
+                  _buildSidebarHeader('WORKSPACE'),
+                  _sideLink(context, Icons.home_filled, 'Dashboard', '/'),
+                  _sideLink(context, Icons.history, 'Recent Files', '/'), // Link to recent section
+                  
+                  const SizedBox(height: 20),
+                  
+                  // SECTION: TOOLS
+                  _buildSidebarHeader('PDF TOOLS'),
+                  _sideLink(context, Icons.link, 'Merge PDF', '/merge'),
+                  _sideLink(context, Icons.content_cut, 'Split PDF', '/split'),
+                  _sideLink(context, Icons.compress, 'Compress PDF', '/compress'),
+                  _sideLink(context, Icons.layers_outlined, 'Organize PDF', '/organize'),
+                  
+                  const SizedBox(height: 20),
+                  
+                  // SECTION: CONVERT (Placeholder for future)
+                  _buildSidebarHeader('CONVERT'),
+                  _sideLink(context, Icons.picture_as_pdf_outlined, 'PDF to Word', '/', isDisabled: true),
+                  _sideLink(context, Icons.image_outlined, 'Image to PDF', '/', isDisabled: true),
+                ],
+              ),
+            ),
+
+            // FOOTER SECTION
+            const Divider(thickness: 1),
             _sideLink(context, Icons.settings_outlined, 'Settings', '/settings'),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
+              child: Text(
+                'v 1.0.0',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: isDark ? Colors.white24 : Colors.black,
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _sideLink(BuildContext context, IconData icon, String title, String route) {
-    final bool isDarkValue = Theme.of(context).brightness == Brightness.dark;
+  // Helper for Sidebar Headers
+  Widget _buildSidebarHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey,
+          letterSpacing: 1.5,
+        ),
+      ),
+    );
+  }
+
+  // Helper for Sidebar Links
+  Widget _sideLink(BuildContext context, IconData icon, String title, String route, {bool isDisabled = false}) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return ListTile(
       visualDensity: VisualDensity.compact,
-      leading: Icon(icon, size: 18, color: isDarkValue ? Colors.white70 : Colors.black87),
-      title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: isDarkValue ? Colors.white : Colors.black)),
-      onTap: () {
-        context.pop();
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+      enabled: !isDisabled,
+      leading: Icon(
+        icon, 
+        size: 18, 
+        color: isDisabled 
+            ? Colors.grey.withOpacity(0.3) 
+            : (isDark ? Colors.white70 : Colors.black87),
+      ),
+      title: Text(
+        title, 
+        style: TextStyle(
+          fontSize: 13, 
+          fontWeight: FontWeight.w500,
+          color: isDisabled 
+              ? Colors.grey.withOpacity(0.3) 
+              : (isDark ? Colors.white : Colors.black),
+        ),
+      ),
+      onTap: isDisabled ? null : () {
+        context.pop(); // Close drawer
         context.push(route);
       },
     );
